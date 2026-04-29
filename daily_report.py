@@ -13,7 +13,7 @@ NOTION_VERSION = "2022-06-28"
 
 TIMEZONE_NAME = os.getenv("TIMEZONE", "Asia/Tokyo")
 LOOKBACK_HOURS = int(os.getenv("LOOKBACK_HOURS", "30"))
-MAX_PER_TOPIC = int(os.getenv("MAX_PER_TOPIC", "6"))
+MAX_PER_TOPIC = int(os.getenv("MAX_PER_TOPIC", "10"))
 MAX_PER_SOURCE_PER_TOPIC = int(os.getenv("MAX_PER_SOURCE_PER_TOPIC", "3"))
 
 TOPICS = ["Physics", "Astronomy", "Mathematics", "AI", "MHD", "Solar Flare", "Magnetic Reconnection"]
