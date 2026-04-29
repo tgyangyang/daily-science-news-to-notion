@@ -12,7 +12,7 @@ from dateutil import parser as dateparser
 NOTION_VERSION = "2022-06-28"
 
 TIMEZONE_NAME = os.getenv("TIMEZONE", "Asia/Tokyo")
-LOOKBACK_HOURS = int(os.getenv("LOOKBACK_HOURS", "30"))
+LOOKBACK_HOURS = int(os.getenv("LOOKBACK_HOURS", "48"))
 MAX_PER_TOPIC = int(os.getenv("MAX_PER_TOPIC", "10"))
 MAX_PER_SOURCE_PER_TOPIC = int(os.getenv("MAX_PER_SOURCE_PER_TOPIC", "3"))
 
