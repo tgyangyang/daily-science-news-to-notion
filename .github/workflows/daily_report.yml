@@ -34,5 +34,5 @@ jobs:
           NOTION_PARENT_PAGE_ID: ${{ secrets.NOTION_PARENT_PAGE_ID }}
           TIMEZONE: Asia/Tokyo
           LOOKBACK_HOURS: '48'
-          MAX_PER_TOPIC: '6'
+          MAX_PER_TOPIC: '10'
           MAX_PER_SOURCE_PER_TOPIC: '3'
