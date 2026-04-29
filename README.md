@@ -1,6 +1,6 @@
 # Daily Science News to Notion
 
-This starter project creates a daily Notion child page containing recent physics, astronomy, mathematics, and AI items from RSS feeds such as Quanta, arXiv, NASA, Phys.org, TechXplore, and ScienceDaily.
+This starter project creates a daily Notion child page containing recent physics, astronomy, mathematics, AI, MHD, solar flares, and magnetic reconnection items from RSS feeds such as Quanta, arXiv, NASA, Phys.org, TechXplore, and ScienceDaily.
 
 It uses:
 
