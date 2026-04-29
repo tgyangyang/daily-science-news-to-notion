@@ -4,7 +4,7 @@ on:
   schedule:
     # Runs every day at 18:17 in Japan time.
     # 17 minutes after the hour avoids GitHub's busiest top-of-hour window.
-    - cron: '17 18 * * *'
+    - cron: '17 8 * * *'
       timezone: 'Asia/Tokyo'
   workflow_dispatch:
 
