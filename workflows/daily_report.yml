@@ -1,0 +1,38 @@
+name: Daily Science News to Notion
+
+on:
+  schedule:
+    # Runs every day at 18:17 in Japan time.
+    # 17 minutes after the hour avoids GitHub's busiest top-of-hour window.
+    - cron: '17 18 * * *'
+      timezone: 'Asia/Tokyo'
+  workflow_dispatch:
+
+jobs:
+  send-report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python packages
+        run: pip install -r requirements.txt
+
+      - name: Build report and send it to Notion
+        run: python daily_report.py
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_PARENT_PAGE_ID: ${{ secrets.NOTION_PARENT_PAGE_ID }}
+          TIMEZONE: Asia/Tokyo
+          LOOKBACK_HOURS: '30'
+          MAX_PER_TOPIC: '6'
+          MAX_PER_SOURCE_PER_TOPIC: '3'
