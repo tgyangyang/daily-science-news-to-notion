@@ -16,10 +16,11 @@ LOOKBACK_HOURS = int(os.getenv("LOOKBACK_HOURS", "30"))
 MAX_PER_TOPIC = int(os.getenv("MAX_PER_TOPIC", "6"))
 MAX_PER_SOURCE_PER_TOPIC = int(os.getenv("MAX_PER_SOURCE_PER_TOPIC", "3"))
 
-TOPICS = ["Physics", "Astronomy", "Mathematics", "AI"]
+TOPICS = ["Physics", "Astronomy", "Mathematics", "AI", "MHD", "Solar Flare", "Magnetic Reconnection"]
 
 # You can add/remove RSS feeds here.
 # topic = the report section where this feed will appear.
+# keywords = optional filter. If present, an item must contain at least one keyword in the title or summary.
 FEEDS = [
     # Physics
     {"topic": "Physics", "source": "Quanta Physics", "url": "https://www.quantamagazine.org/physics/feed/"},
@@ -44,6 +45,111 @@ FEEDS = [
     {"topic": "AI", "source": "arXiv AI/ML", "url": "https://rss.arxiv.org/rss/cs.AI+cs.LG+stat.ML"},
     {"topic": "AI", "source": "TechXplore AI", "url": "https://techxplore.com/rss-feed/machine-learning-ai-news/"},
     {"topic": "AI", "source": "ScienceDaily AI", "url": "https://www.sciencedaily.com/rss/computers_math/artificial_intelligence.xml"},
+
+    # Magnetohydrodynamics / MHD
+    {
+        "topic": "MHD",
+        "source": "arXiv Solar/Plasma/Space/Fluids",
+        "url": "https://rss.arxiv.org/rss/astro-ph.SR+physics.plasm-ph+physics.space-ph+physics.flu-dyn",
+        "keywords": [
+            "MHD", "magnetohydrodynamic", "magnetohydrodynamics", "Alfven", "Alfvén",
+            "solar dynamo", "dynamo", "plasma turbulence", "MHD turbulence"
+        ],
+    },
+    {
+        "topic": "MHD",
+        "source": "Phys.org Space",
+        "url": "https://phys.org/rss-feed/space-news/",
+        "keywords": [
+            "MHD", "magnetohydrodynamic", "magnetohydrodynamics", "Alfven", "Alfvén",
+            "solar dynamo", "dynamo", "plasma turbulence", "MHD turbulence"
+        ],
+    },
+    {
+        "topic": "MHD",
+        "source": "ScienceDaily Astronomy",
+        "url": "https://www.sciencedaily.com/rss/space_time/astronomy.xml",
+        "keywords": [
+            "MHD", "magnetohydrodynamic", "magnetohydrodynamics", "Alfven", "Alfvén",
+            "solar dynamo", "dynamo", "plasma turbulence", "MHD turbulence"
+        ],
+    },
+
+    # Solar flares
+    {
+        "topic": "Solar Flare",
+        "source": "arXiv Solar/Plasma/Space",
+        "url": "https://rss.arxiv.org/rss/astro-ph.SR+physics.plasm-ph+physics.space-ph",
+        "keywords": [
+            "solar flare", "solar flares", "flare", "flares", "solar eruption", "solar eruptions",
+            "coronal mass ejection", "CME", "active region", "sunspot", "space weather"
+        ],
+    },
+    {
+        "topic": "Solar Flare",
+        "source": "NASA",
+        "url": "https://www.nasa.gov/feed/",
+        "keywords": [
+            "solar flare", "solar flares", "solar eruption", "solar eruptions",
+            "coronal mass ejection", "CME", "active region", "sunspot", "space weather"
+        ],
+    },
+    {
+        "topic": "Solar Flare",
+        "source": "Phys.org Space",
+        "url": "https://phys.org/rss-feed/space-news/",
+        "keywords": [
+            "solar flare", "solar flares", "solar eruption", "solar eruptions",
+            "coronal mass ejection", "CME", "active region", "sunspot", "space weather"
+        ],
+    },
+    {
+        "topic": "Solar Flare",
+        "source": "ScienceDaily Astronomy",
+        "url": "https://www.sciencedaily.com/rss/space_time/astronomy.xml",
+        "keywords": [
+            "solar flare", "solar flares", "solar eruption", "solar eruptions",
+            "coronal mass ejection", "CME", "active region", "sunspot", "space weather"
+        ],
+    },
+
+    # Magnetic reconnection
+    {
+        "topic": "Magnetic Reconnection",
+        "source": "arXiv Solar/Plasma/Space",
+        "url": "https://rss.arxiv.org/rss/astro-ph.SR+physics.plasm-ph+physics.space-ph",
+        "keywords": [
+            "magnetic reconnection", "reconnection", "current sheet", "current sheets",
+            "plasmoid", "plasmoids", "tearing mode", "flux rope", "flux ropes"
+        ],
+    },
+    {
+        "topic": "Magnetic Reconnection",
+        "source": "NASA",
+        "url": "https://www.nasa.gov/feed/",
+        "keywords": [
+            "magnetic reconnection", "reconnection", "current sheet", "current sheets",
+            "plasmoid", "plasmoids", "tearing mode", "flux rope", "flux ropes"
+        ],
+    },
+    {
+        "topic": "Magnetic Reconnection",
+        "source": "Phys.org Space",
+        "url": "https://phys.org/rss-feed/space-news/",
+        "keywords": [
+            "magnetic reconnection", "reconnection", "current sheet", "current sheets",
+            "plasmoid", "plasmoids", "tearing mode", "flux rope", "flux ropes"
+        ],
+    },
+    {
+        "topic": "Magnetic Reconnection",
+        "source": "ScienceDaily Astronomy",
+        "url": "https://www.sciencedaily.com/rss/space_time/astronomy.xml",
+        "keywords": [
+            "magnetic reconnection", "reconnection", "current sheet", "current sheets",
+            "plasmoid", "plasmoids", "tearing mode", "flux rope", "flux ropes"
+        ],
+    },
 ]
 
 
@@ -79,6 +185,29 @@ def strip_html(text: str) -> str:
     text = re.sub(r"<[^>]+>", " ", text)
     text = re.sub(r"\s+", " ", text)
     return text.strip()
+
+
+def matches_keywords(title: str, summary: str, keywords: list[str]) -> bool:
+    """Return True if no filter is set, or if title/summary contains one of the keywords."""
+    if not keywords:
+        return True
+
+    text = f"{title} {summary}".lower()
+
+    for keyword in keywords:
+        keyword = keyword.strip().lower()
+        if not keyword:
+            continue
+
+        # For short acronyms such as MHD or CME, require a whole-word match.
+        # This avoids accidental matches inside longer words.
+        if len(keyword) <= 4 and re.fullmatch(r"[a-z0-9]+", keyword):
+            if re.search(rf"\b{re.escape(keyword)}\b", text):
+                return True
+        elif keyword in text:
+            return True
+
+    return False
 
 
 def truncate(text: str, limit: int) -> str:
@@ -136,6 +265,9 @@ def fetch_feed(feed_info: dict, cutoff: datetime):
         published_utc = parse_entry_date(entry)
 
         if published_utc < cutoff:
+            continue
+
+        if not matches_keywords(title, summary, feed_info.get("keywords", [])):
             continue
 
         items.append(
@@ -289,7 +421,8 @@ def main():
         errors.extend(feed_errors)
 
         for item in items:
-            key = (item["link"] or item["title"]).split("?")[0].strip().lower()
+            base_key = (item["link"] or item["title"]).split("?")[0].strip().lower()
+            key = (item["topic"], base_key)
             if key in seen:
                 continue
             seen.add(key)
