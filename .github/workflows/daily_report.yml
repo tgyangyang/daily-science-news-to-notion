@@ -2,9 +2,9 @@ name: Daily Science News to Notion
 
 on:
   schedule:
-    # Runs every day at 18:17 in Japan time.
+    # Runs every day at 10:17 in Japan time.
     # 17 minutes after the hour avoids GitHub's busiest top-of-hour window.
-    - cron: '17 8 * * *'
+    - cron: '17 10 * * *'
       timezone: 'Asia/Tokyo'
   workflow_dispatch:
 
