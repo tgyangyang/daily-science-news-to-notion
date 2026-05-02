@@ -14,7 +14,7 @@ NOTION_VERSION = "2022-06-28"
 TIMEZONE_NAME = os.getenv("TIMEZONE", "Asia/Tokyo")
 LOOKBACK_HOURS = int(os.getenv("LOOKBACK_HOURS", "48"))
 MAX_PER_TOPIC = int(os.getenv("MAX_PER_TOPIC", "10"))
-MAX_PER_SOURCE_PER_TOPIC = int(os.getenv("MAX_PER_SOURCE_PER_TOPIC", "3"))
+MAX_PER_SOURCE_PER_TOPIC = int(os.getenv("MAX_PER_SOURCE_PER_TOPIC", str(MAX_PER_TOPIC)))
 
 TOPICS = ["Physics", "Astronomy", "Mathematics", "AI", "MHD", "Solar Flare", "Magnetic Reconnection"]
 
@@ -374,7 +374,33 @@ def build_blocks(selected: dict, errors: list, now_local: datetime) -> list:
         for error in errors[:10]:
             blocks.append(bullet(truncate(error, 700), "", ""))
 
-    return blocks[:95]  # Notion allows up to 100 children in a single create-page request.
+    return blocks  # Notion blocks are sent in batches by create_notion_page().
+
+
+def notion_headers(notion_token: str) -> dict:
+    return {
+        "Authorization": f"Bearer {notion_token}",
+        "Notion-Version": NOTION_VERSION,
+        "Content-Type": "application/json",
+    }
+
+
+def raise_for_notion_error(response: requests.Response) -> None:
+    if response.status_code >= 400:
+        raise RuntimeError(f"Notion API error {response.status_code}: {response.text}")
+
+
+def append_notion_blocks(page_id: str, blocks: list, notion_token: str) -> None:
+    """Append child blocks in batches because Notion accepts at most 100 children per request."""
+    for start in range(0, len(blocks), 100):
+        chunk = blocks[start : start + 100]
+        response = requests.patch(
+            f"https://api.notion.com/v1/blocks/{page_id}/children",
+            headers=notion_headers(notion_token),
+            json={"children": chunk},
+            timeout=25,
+        )
+        raise_for_notion_error(response)
 
 
 def create_notion_page(title: str, blocks: list) -> str:
@@ -386,24 +412,23 @@ def create_notion_page(title: str, blocks: list) -> str:
         "properties": {
             "title": [{"type": "text", "text": {"content": title}}],
         },
-        "children": blocks,
     }
 
     response = requests.post(
         "https://api.notion.com/v1/pages",
-        headers={
-            "Authorization": f"Bearer {notion_token}",
-            "Notion-Version": NOTION_VERSION,
-            "Content-Type": "application/json",
-        },
+        headers=notion_headers(notion_token),
         json=payload,
         timeout=25,
     )
+    raise_for_notion_error(response)
 
-    if response.status_code >= 400:
-        raise RuntimeError(f"Notion API error {response.status_code}: {response.text}")
+    page_data = response.json()
+    page_id = page_data["id"]
 
-    return response.json().get("url", "(URL not returned)")
+    if blocks:
+        append_notion_blocks(page_id, blocks, notion_token)
+
+    return page_data.get("url", "(URL not returned)")
 
 
 def main():
